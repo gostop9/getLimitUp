@@ -10,6 +10,7 @@ import datetime
 from operator import itemgetter, attrgetter
 import pymongo
 from scrapy.conf import settings
+import struct
 
 class CShareTdxSave:
     @staticmethod
@@ -26,8 +27,49 @@ class CShareTdxSave:
             fsws.write(code)
         fsws.close()
         
+        fileNameSws = 'C:/sws2010/T0002/blocknew/ZXG.blk'
+        fsws = open(fileNameSws, "a")
+        for i in range(len(lists)):        
+            fsws.write('\n')
+            code = lists[i][0]
+            if('6' == code[0]):
+                fsws.write('1')
+            else:
+                fsws.write('0')
+            fsws.write(code)
+        fsws.close()
+        
         fileNameHt = 'C:/new_haitong/T0002/blocknew/ZXG.blk'
+        fht = open(fileNameHt, 'r')
+        lines = fht.readlines()
+        num = len(lines)
+        fht.close()
+        
+        list = []
+        for i in range(len(lists)):
+            code = lists[i][0]
+            if('6' == code[0]):
+                list.append('1' + code + '\n')
+            else:
+                list.append('0' + code + '\n')
+                
+        for i in range(len(list)):
+            for j in range(len(lines)):        
+                code = lines[j]
+                if(list[i] == code):
+                    lines.pop(j)
+                    break
         fht = open(fileNameHt, "w")
+        
+        fht.write('\n')
+        for i in range(len(list)):
+            fht.write(list[i])
+        for i in range(len(lines)):
+            fht.write(lines[i])
+        
+        fht.close()
+        '''    
+        fht = open(fileNameHt, "a")
         for i in range(len(lists)):        
             fht.write('\n')
             code = lists[i][0]
@@ -36,6 +78,196 @@ class CShareTdxSave:
             else:
                 fht.write('0')
             fht.write(code)
+        fht.close()
+        '''
+        '''
+        fileNameHt = 'D:/Softs/通达信/通达信金融终端海通证券和谐版/T0002/blocknew/ZXG.blk'
+        fht = open(fileNameHt, "a")
+        for i in range(len(lists)):        
+            fht.write('\n')
+            code = lists[i][0]
+            if('6' == code[0]):
+                fht.write('1')
+            else:
+                fht.write('0')
+            fht.write(code)
+        fht.close()
+        
+        #save share mark
+        fileNameHt = 'D:/Softs/通达信/通达信金融终端海通证券和谐版/T0002/mark.dat'
+        fht = open(fileNameHt, "w")
+        fht.write('[MARK]\n')
+        for i in range(len(lists)):
+            code = lists[i][0]
+            if('6' == code[0]):
+                fht.write('01')
+            else:
+                fht.write('00')
+            fht.write(code + '=7\n')
+        fht.write('[TIP]\n')
+        for i in range(len(lists)):
+            code = lists[i][0]
+            if('6' == code[0]):
+                fht.write('01')
+            else:
+                fht.write('00')
+            fht.write(code + '=\n')
+        fht.write('[TIPWORD]\n')
+        for i in range(len(lists)):
+            code = lists[i][0]
+            if('6' == code[0]):
+                fht.write('01')
+            else:
+                fht.write('00')
+            limitReason = lists[i][12]
+            fht.write(code + '=' + limitReason + '\n')
+        fht.write('[TIME]\n')
+        for i in range(len(lists)):
+            code = lists[i][0]
+            if('6' == code[0]):
+                fht.write('01')
+            else:
+                fht.write('00')
+            limitReason = lists[i][12]
+            fht.write(code + '=0\n')
+        fht.close()
+        '''
+        
+        fileNameHt = 'C:/new_haitong/T0002/mark.dat'  
+        
+        #fht = open(fileNameHt, 'r', encoding='UTF-8')
+        fht = open(fileNameHt, 'r')
+        lines = fht.readlines()
+        num = len(lines)
+        fht.close()
+        
+        group = (int)(num / 4)
+        mark = lines[1:group]
+        tip = lines[(group+1):2*group]
+        tipword = lines[(2*group+1):3*group]
+        time = lines[(3*group+1):4*group] 
+        
+        list = []
+        for i in range(len(lists)):
+            code = lists[i][0]
+            if('6' == code[0]):
+                list.append('01' + code + '=')
+            else:
+                list.append('00' + code + '=')
+        
+        for i in range(len(list)):
+            for j in range(len(mark)):        
+                code = mark[j][0:9]
+                if(list[i] == code):
+                    mark.pop(j)
+                    break
+        for i in range(len(list)):
+            for j in range(len(tip)):        
+                code = tip[j][0:9]
+                if(list[i] == code):
+                    tip.pop(j)
+                    break            
+        for i in range(len(list)):
+            for j in range(len(tipword)):        
+                code = tipword[j][0:9]
+                if(list[i] == code):
+                    tipword.pop(j)
+                    break
+        for i in range(len(list)):
+            for j in range(len(time)):        
+                code = time[j][0:9]
+                if(list[i] == code):
+                    time.pop(j)
+                    break
+        
+        fht = open(fileNameHt, "w")            
+        fht.write('[MARK]\n')
+        for i in range(len(list)):
+            fht.write(list[i] + '7\n')
+        for i in range(len(mark)):
+            fht.write(mark[i])
+        fht.write('[TIP]\n')
+        for i in range(len(list)):
+            continueDay = lists[i][5]
+            fht.write(list[i] + continueDay + '\n')
+        for i in range(len(tip)):
+            fht.write(tip[i])
+        fht.write('[TIPWORD]\n')
+        for i in range(len(lists)):
+            limitReason = lists[i][12]
+            fht.write(list[i] + limitReason + '\n')
+        for i in range(len(tipword)):
+            fht.write(tipword[i])
+        fht.write('[TIME]\n')
+        for i in range(len(list)):
+            firstLimitTime = lists[i][6]
+            fTIme = str(int(firstLimitTime.replace(':', ''), 10))
+            fht.write(list[i] + fTIme + '\n')
+        for i in range(len(time)):
+            fht.write(time[i])
+            
+        ##############读写条件预警文件
+        fileNameHt = 'C:/new_haitong/T0002/col_cfgwarn.dat'  
+        fht = open(fileNameHt, 'rb')
+        read_buf = fht.read(868)
+        fht.close()
+        fht = open(fileNameHt, "wb")
+        #a = struct.pack('B', int(read_buf))
+        fht.write(read_buf)
+        a = struct.pack('L', int(len(list)))
+        fht.write(a)
+        for i in range(len(list)):
+            for x in range(4):
+                a = struct.pack('B', 0)
+                fht.write(a)
+            fht.write(str.encode(list[i][2:8]))
+            for x in range(17):
+                a = struct.pack('B', 0)
+                fht.write(a)
+            a = struct.pack('B', 1)
+            fht.write(a)
+            for x in range(33):
+                a = struct.pack('B', 0)
+                fht.write(a)
+                
+        fht.close()
+        
+        '''    
+        for i in range(len(lists)):
+            code = lists[i][0]
+            if('6' == code[0]):
+                fht.write('01')
+            else:
+                fht.write('00')
+            fht.write(code + '=7\n')
+        fht.write('[TIP]\n')
+        for i in range(len(lists)):
+            code = lists[i][0]
+            if('6' == code[0]):
+                fht.write('01')
+            else:
+                fht.write('00')
+            fht.write(code + '=\n')
+        fht.write('[TIPWORD]\n')
+        for i in range(len(lists)):
+            code = lists[i][0]
+            if('6' == code[0]):
+                fht.write('01')
+            else:
+                fht.write('00')
+            limitReason = lists[i][12]
+            fht.write(code + '=' + limitReason + '\n')
+        fht.write('[TIME]\n')
+        for i in range(len(lists)):
+            code = lists[i][0]
+            if('6' == code[0]):
+                fht.write('01')
+            else:
+                fht.write('00')
+            limitReason = lists[i][12]
+            fht.write(code + '=0\n')
+        '''
+        
         fht.close()
     
     @staticmethod    
@@ -87,8 +319,6 @@ class GetlimitupPipeline(object):
         self.client = mydb[sheetname]
         '''
         
-        mongoData = dict(item)
-        self.client.insert(mongoData)
         
         print(item['minLen'])
         lists = []
@@ -125,32 +355,39 @@ class GetlimitupPipeline(object):
             
             lists.append(list)
         
-        # sort as limitVsCirculate
-        lists.sort(key = lambda x:(float(x[10])), reverse = True)
-        
-        self.fwencai.write(str(len(lists)))
-        text = '\ncode\t'+'name\t'+'量比\t'+'实际换手\t'+'自由流通市值\t'+'连续涨停天数\t'+'首次涨停时间\t'+'最终涨停时间\t'+'涨停打开次数\t'+'封成比\t'+'封流比\t'+'封单额\t'+'涨停原因\t'+'股性评分\t'+'封单量\t'+'开盘价\t'+'收盘价\t'+'最高价\t'+'最低价\t'+'振幅\t'+'成交额\t'+'成交量\t'+'换手率\t'+'自由流通股\t'+'流通A股\t'+'流通市值\t'+'上市天数 '+'总股本\n'
-        self.fwencai.write(text)
-        
-        for i in range(len(lists)):
-            for j in range(len(lists[i])):
-                #printStr = '%(item)-5s'%{'item':str(lists[i][j])}
-                printStr = '{: <10s}'.format(str(lists[i][j]))
-                self.fwencai.write(printStr + '\t')
+        if (len(lists) > 10):
+            
+            mongoData = dict(item)
+            self.client.insert(mongoData)
+            
+            # sort as limitVsCirculate
+            #lists.sort(key = lambda x:(float(x[10])), reverse = True)
+            lists.sort(key = lambda x:(int(x[7].replace(':', ''), 10)), reverse = False)
+            lists.sort(key = lambda x:(float(x[5])), reverse = True)
+            
+            self.fwencai.write(str(len(lists)))
+            text = '\ncode\t'+'name\t'+'量比\t'+'实际换手\t'+'自由流通市值\t'+'连续涨停天数\t'+'首次涨停时间\t'+'最终涨停时间\t'+'涨停打开次数\t'+'封成比\t'+'封流比\t'+'封单额\t'+'涨停原因\t'+'股性评分\t'+'封单量\t'+'开盘价\t'+'收盘价\t'+'最高价\t'+'最低价\t'+'振幅\t'+'成交额\t'+'成交量\t'+'换手率\t'+'自由流通股\t'+'流通A股\t'+'流通市值\t'+'上市天数 '+'总股本\n'
+            self.fwencai.write(text)
+            
+            for i in range(len(lists)):
+                for j in range(len(lists[i])):
+                    #printStr = '%(item)-5s'%{'item':str(lists[i][j])}
+                    printStr = '{: <10s}'.format(str(lists[i][j]))
+                    self.fwencai.write(printStr + '\t')
+                self.fwencai.write('\n')
             self.fwencai.write('\n')
-        self.fwencai.write('\n')
-        
-        
-        #
-        shareSave = CShareTdxSave()        
-        if(shareSave.getCurrentTimeInt() > 150000):
-            shareSave.shareCodeSave(lists)
-        
-        #self.fwencai.close()
-        
-        
-        #mongoData = dict(lists)
-        #self.client.insert(mongoData)
+            
+            
+            #
+            shareSave = CShareTdxSave()        
+            if(shareSave.getCurrentTimeInt() > 150000):
+                shareSave.shareCodeSave(lists)
+            
+            #self.fwencai.close()
+            
+            
+            #mongoData = dict(lists)
+            #self.client.insert(mongoData)
         
         return item
 

@@ -78,7 +78,7 @@ class GetsharelimitupSpider(scrapy.Spider):
         #'Upgrade-Insecure-Requests':'1',
         'User-Agent':'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
         'X-Requested-With':'XMLHttpRequest',
-        'hexin-v':'AgeGyk75FjoVzpK2-tJS1FPFlrDSDNtJNeNfYtn0Ixa9SCmm4dxrPkWw77jq'
+        'hexin-v':'AlzdSzEAblIXdxoOzpZZJSTMLXEN1QB4gnoUwzZdaMcqgfKnXuXQj9KJ5FmF'
     }
     formatStr = "今日涨停，成交额，量比，换手率，振幅，流通股，自由流通股，自由流通市值，收盘价前复权，股性评分，连续涨停天数，涨停开板次数，涨停封成比，涨停封流比，涨停封单额，涨停原因类别，涨停封单量，成交量，实际换手率，首次涨停时间，最终涨停时间，开盘价前复权，收盘价前复权，最高价前复权，最低价前复权，流通市值，上市天数，总股本，所属同花顺行业"
     querystring = {

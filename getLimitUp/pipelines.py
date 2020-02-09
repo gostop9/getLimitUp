@@ -14,7 +14,150 @@ import struct
 
 class CShareTdxSave:
     @staticmethod
-    def shareCodeSave(lists):
+    def zrzt_change(self, fileName, lists):
+        fp = open(fileName, "w")
+        for i in range(len(lists)):        
+            fp.write('\n')
+            code = lists[i][0]
+            if('6' == code[0]):
+                fp.write('1')
+            else:
+                fp.write('0')
+            fp.write(code)
+        fp.close()
+        
+    def zxg_change(self, fileName, lists):
+        fp = open(fileName, 'r')
+        lines = fp.readlines()
+        num = len(lines)
+        fp.close()
+        
+        list = []
+        for i in range(len(lists)):
+            code = lists[i][0]
+            if('6' == code[0]):
+                list.append('1' + code + '\n')
+            else:
+                list.append('0' + code + '\n')
+                
+        for i in range(len(list)):
+            for j in range(len(lines)):        
+                code = lines[j]
+                if(list[i] == code):
+                    lines.pop(j)
+                    break
+        fp = open(fileName, "w")
+        
+        fp.write('\n')
+        for i in range(len(list)):
+            fp.write(list[i])
+        for i in range(len(lines)):
+            fp.write(lines[i])
+        
+        fp.close()
+        
+    def mark_change(self, fileName, lists):
+        #fht = open(fileNameHt, 'r', encoding='UTF-8')
+        fp = open(fileName, 'r')
+        lines = fp.readlines()
+        num = len(lines)
+        fp.close()
+        
+        group = (int)(num / 4)
+        mark = lines[1:group]
+        tip = lines[(group+1):2*group]
+        tipword = lines[(2*group+1):3*group]
+        time = lines[(3*group+1):4*group] 
+        
+        list = []
+        for i in range(len(lists)):
+            code = lists[i][0]
+            if('6' == code[0]):
+                list.append('01' + code + '=')
+            else:
+                list.append('00' + code + '=')
+        
+        for i in range(len(list)):
+            for j in range(len(mark)):        
+                code = mark[j][0:9]
+                if(list[i] == code):
+                    mark.pop(j)
+                    break
+        for i in range(len(list)):
+            for j in range(len(tip)):        
+                code = tip[j][0:9]
+                if(list[i] == code):
+                    tip.pop(j)
+                    break            
+        for i in range(len(list)):
+            for j in range(len(tipword)):        
+                code = tipword[j][0:9]
+                if(list[i] == code):
+                    tipword.pop(j)
+                    break
+        for i in range(len(list)):
+            for j in range(len(time)):        
+                code = time[j][0:9]
+                if(list[i] == code):
+                    time.pop(j)
+                    break
+        
+        fp = open(fileName, "w")            
+        fp.write('[MARK]\n')
+        for i in range(len(list)):
+            fp.write(list[i] + '7\n')
+        for i in range(len(mark)):
+            fp.write(mark[i])
+        fp.write('[TIP]\n')
+        for i in range(len(list)):
+            continueDay = lists[i][5]
+            fp.write(list[i] + continueDay + '\n')
+        for i in range(len(tip)):
+            fp.write(tip[i])
+        fp.write('[TIPWORD]\n')
+        for i in range(len(lists)):
+            limitReason = lists[i][12]
+            fp.write(list[i] + limitReason + '\n')
+        for i in range(len(tipword)):
+            fp.write(tipword[i])
+        fp.write('[TIME]\n')
+        for i in range(len(list)):
+            firstLimitTime = lists[i][6]
+            fTIme = str(int(firstLimitTime.replace(':', ''), 10))
+            fp.write(list[i] + fTIme + '\n')
+        for i in range(len(time)):
+            fp.write(time[i])
+        fp.close()
+        
+        return list
+        
+    def warn_change(self, fileName, list):
+        fp = open(fileName, 'rb')
+        read_buf = fp.read(868)
+        fp.close()
+        fp = open(fileName, "wb")
+        #a = struct.pack('B', int(read_buf))
+        fp.write(read_buf)
+        a = struct.pack('L', int(len(list)))
+        fp.write(a)
+        for i in range(len(list)):
+            for x in range(4):
+                a = struct.pack('B', 0)
+                fp.write(a)
+            fp.write(str.encode(list[i][2:8]))
+            for x in range(17):
+                a = struct.pack('B', 0)
+                fp.write(a)
+            a = struct.pack('B', 1)
+            fp.write(a)
+            for x in range(33):
+                a = struct.pack('B', 0)
+                fp.write(a)
+                
+        fp.close()
+        
+    def shareCodeSave(self, lists):
+        '''
         fileNameSws = 'C:/sws2010/T0002/blocknew/ZRZT.blk'
         fsws = open(fileNameSws, "w")
         for i in range(len(lists)):        
@@ -26,8 +169,11 @@ class CShareTdxSave:
                 fsws.write('0')
             fsws.write(code)
         fsws.close()
+        '''
         
-        fileNameSws = 'C:/sws2010/T0002/blocknew/ZXG.blk'
+        '''
+        fileNameSws = 'C:/sws2010/T0002/blocknew/ZXG.blk'        
+        
         fsws = open(fileNameSws, "a")
         for i in range(len(lists)):        
             fsws.write('\n')
@@ -38,8 +184,15 @@ class CShareTdxSave:
                 fsws.write('0')
             fsws.write(code)
         fsws.close()
+        '''
         
         fileNameHt = 'C:/new_haitong/T0002/blocknew/ZXG.blk'
+        self.zxg_change(fileNameHt, lists)
+        self.zxg_change('D:/new_jyqyb/T0002/blocknew/ZXG.blk', lists)
+        self.zxg_change('D:/zd_cjzq/T0002/blocknew/ZXG.blk', lists)
+        self.zxg_change('D:/new_jyplug/T0002/blocknew/ZXG.blk', lists)
+        
+        '''
         fht = open(fileNameHt, 'r')
         lines = fht.readlines()
         num = len(lines)
@@ -68,6 +221,7 @@ class CShareTdxSave:
             fht.write(lines[i])
         
         fht.close()
+        '''
         '''    
         fht = open(fileNameHt, "a")
         for i in range(len(lists)):        
@@ -134,7 +288,19 @@ class CShareTdxSave:
         '''
         
         fileNameHt = 'C:/new_haitong/T0002/mark.dat'  
+        list1 = self.mark_change(fileNameHt, lists)        
+        list2 = self.mark_change('D:/new_jyqyb/T0002/mark.dat', lists)
+        list3 = self.mark_change('D:/zd_cjzq/T0002/mark.dat', lists)        
+        list4 = self.mark_change('D:/new_jyplug/T0002/mark.dat', lists)
         
+        ##############读写条件预警文件
+        fileNameHt = 'C:/new_haitong/T0002/col_cfgwarn.dat'  
+        self.warn_change(fileNameHt, list1)
+        self.warn_change('D:/new_jyqyb/T0002/col_cfgwarn.dat', list2)
+        self.warn_change('D:/zd_cjzq/T0002/col_cfgwarn.dat', list3)
+        self.warn_change('D:/new_jyplug/T0002/col_cfgwarn.dat', list4)
+        
+        '''
         #fht = open(fileNameHt, 'r', encoding='UTF-8')
         fht = open(fileNameHt, 'r')
         lines = fht.readlines()
@@ -205,9 +371,11 @@ class CShareTdxSave:
             fht.write(list[i] + fTIme + '\n')
         for i in range(len(time)):
             fht.write(time[i])
-            
-        ##############读写条件预警文件
-        fileNameHt = 'C:/new_haitong/T0002/col_cfgwarn.dat'  
+        fht.close()
+        '''
+        
+        
+        '''
         fht = open(fileNameHt, 'rb')
         read_buf = fht.read(868)
         fht.close()
@@ -230,7 +398,8 @@ class CShareTdxSave:
                 a = struct.pack('B', 0)
                 fht.write(a)
                 
-        fht.close()
+        fht.close()        
+        '''
         
         '''    
         for i in range(len(lists)):
@@ -268,7 +437,7 @@ class CShareTdxSave:
             fht.write(code + '=0\n')
         '''
         
-        fht.close()
+        #fht.close()
     
     @staticmethod    
     def getCurrentTimeInt():
@@ -361,7 +530,8 @@ class GetlimitupPipeline(object):
             self.client.insert(mongoData)
             
             # sort as limitVsCirculate
-            #lists.sort(key = lambda x:(float(x[10])), reverse = True)
+            #lists.sort(key = lambda x:(float(x[10])), reverse = True)            
+            lists.sort(key = lambda x:(float(x[10])), reverse = True)
             lists.sort(key = lambda x:(int(x[7].replace(':', ''), 10)), reverse = False)
             lists.sort(key = lambda x:(float(x[5])), reverse = True)
             
